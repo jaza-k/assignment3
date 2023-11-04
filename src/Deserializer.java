@@ -1,8 +1,6 @@
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.input.SAXBuilder;
 
-import java.io.StringReader;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.List;

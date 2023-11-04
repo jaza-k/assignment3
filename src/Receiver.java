@@ -12,9 +12,10 @@ public class Receiver {
     private static Deserializer deserializer = null;
 
     public static void main(String[] args) throws JDOMException {
-        int port = 54321; // Specify the port you want to use for communication
+        int port = 12345; // Specify the port you want to use for communication
         deserializer = new Deserializer();
 
+        // Some code is taken from tutorial Week 7 - Spooky Session 2 (MyServer.java)
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             Socket socket = serverSocket.accept();

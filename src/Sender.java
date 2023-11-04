@@ -5,16 +5,9 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.net.Socket;
 
 public class Sender {
@@ -35,8 +28,7 @@ public class Sender {
         System.out.println("2. References Object - contains references to other objects");
         System.out.println("3. Primitive Array Object - contains an array of primitives");
         System.out.println("4. References Array Object - contains an array of object references");
-        System.out.println(
-                "5. Java Collection Object - uses one of Java’s collection classes to refer to other objects\n");
+        System.out.println("5. Java Collection Object - uses one of Java’s collection classes to refer to other objects\n");
 
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -78,43 +70,27 @@ public class Sender {
 
         Document document = serializer.serialize(obj);
 
-        // System.out.println("Creating document to send...");
-        // File fileToSend = XMLtoFile(document);
-
         System.out.println("Now going to send XML document...");
         sendDoc(hostname, port, document);
     }
 
-    // XML TO FILE
-    // private static File XMLtoFile(Document document) throws IOException {
-    // XMLOutputter xmlOutput = new XMLOutputter();
-    // xmlOutput.setFormat(Format.getPrettyFormat());
-
-    // File sendFile = new File("fileToSend.xml");
-    // BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(sendFile));
-
-    // xmlOutput.output(document, bufferedWriter);
-    // bufferedWriter.close();
-
-    // return sendFile;
-    // }
-
-    // SENDING FILE
+    // SENDING DOC
+    // Some code is taken from tutorial Week 7 - Spooky Session 2 (MyClient.java)
     private static void sendDoc(String hostname, int port, Document document) {
         try {
             System.out.println("Connecting to " + hostname + " on port: " + port);
 
             Socket socket = new Socket(hostname, port);
             System.out.println("Connected to " + socket.getRemoteSocketAddress());
-            // Create output stream for communication using the BufferedOutputStream
+
+            // reate output stream for communication using the BufferedOutputStream
             OutputStream outputStream = socket.getOutputStream();
             BufferedOutputStream bufferedStream = new BufferedOutputStream(outputStream);
 
-            // prepare output
             XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
             String xmlString = xmlOutputter.outputString(document);
 
-            // Stream we will use to output to the server
+            // stream to output to the server
             ByteArrayOutputStream byteoutStream = new ByteArrayOutputStream();
 
             // set the XMLOutputter object to send output through our stream
@@ -123,15 +99,13 @@ public class Sender {
             // all bytes should be fed into a byteList so it can be written
             byte[] byteList = byteoutStream.toByteArray();
 
-            // Send the JDOM to the server
+            // Send JDOM to server
             bufferedStream.write(byteList);
 
-            // flush the stream to get everything out of there, then close
             bufferedStream.flush();
             bufferedStream.close();
             byteoutStream.close();
             socket.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -179,6 +153,7 @@ public class Sender {
         ReferencesArray referencesArray = new ReferencesArray(refObjArray);
 
         System.out.println("Created array of references");
+        
         // print out array
         System.out.println("Your array values: ");
         for (int i = 0; i < size; i++) {
@@ -222,10 +197,6 @@ public class Sender {
 
         System.out.println("Enter double value: ");
         simpleObject.setDoubleValue(scanner.nextDouble());
-
-        scanner.nextLine();
-        System.out.println("Enter string value: ");
-        simpleObject.setStringValue(scanner.nextLine());
 
         ReferencesObject referencesObject = new ReferencesObject(simpleObject);
 
