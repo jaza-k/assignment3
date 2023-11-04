@@ -1,4 +1,6 @@
-public class ReferencesObject {
+import java.io.Serializable;
+
+public class ReferencesObject implements Serializable {
     public SimpleObject fieldObject;
 
     // no argument constructor
