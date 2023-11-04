@@ -5,14 +5,15 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Receiver {
     private static Deserializer deserializer = null;
 
-    public static void main(String[] args) throws JDOMException {
-        int port = 12345; // Specify the port you want to use for communication
+    public static void main(String[] args) throws JDOMException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        int port = 12345; 
         deserializer = new Deserializer();
 
         // Some code is taken from tutorial Week 7 - Spooky Session 2 (MyServer.java)
@@ -51,7 +52,14 @@ public class Receiver {
         }
     }
 
-    private static void processDeserializedObject(Object deserializedObject) {
-        System.out.println("Deserialized object: " + deserializedObject.getClass().getName());
+    private static void processDeserializedObject(Object deserializedObject) throws IllegalArgumentException, IllegalAccessException {
+        // invoke Inspector
+        Inspector inspector = new Inspector();
+        inspector.inspect(deserializedObject, false);
+
+        System.out.println("\nDeserialized object: " + deserializedObject.getClass().getName());
+        System.out.println("Object hashcode: " + System.identityHashCode(deserializedObject));
+        System.out.println("Object fields: " + deserializedObject.getClass().getDeclaredFields().length);
+        System.out.println("Object methods: " + deserializedObject.getClass().getDeclaredMethods().length);
     }
 }

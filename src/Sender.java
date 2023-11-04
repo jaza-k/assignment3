@@ -3,7 +3,10 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -70,8 +73,25 @@ public class Sender {
 
         Document document = serializer.serialize(obj);
 
+        System.out.println("Creating document to send...");
+        File fileToSend = XMLtoFile(document);
+
         System.out.println("Now going to send XML document...");
         sendDoc(hostname, port, document);
+    }
+
+    // XML TO FILE
+    private static File XMLtoFile(Document document) throws IOException {
+        XMLOutputter xmlOutput = new XMLOutputter();
+        xmlOutput.setFormat(Format.getPrettyFormat());
+
+        File sendFile = new File("fileToSend.xml");
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(sendFile));
+
+        xmlOutput.output(document, bufferedWriter);
+        bufferedWriter.close();
+
+        return sendFile;
     }
 
     // SENDING DOC
