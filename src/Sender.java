@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.Scanner;
 import org.jdom2.Document;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -9,17 +7,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Sender {
-    private static Serializer serializer = null;
+    private static Serializer serializer = new Serializer();
 
     public static void main(String[] args) throws IOException {
         String hostname = "localhost";
         int port = 12345;
 
-        serializer = new Serializer();
-        Object objectToSerialize = null;
+        // create object to serialize first
+        Object objectToSerialize = getObjectToSerialize();
 
+        // serialize the object
+        serializeObject(hostname, port, objectToSerialize);
+    }
+
+    private static Object getObjectToSerialize() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Choose an object type to create (enter number):");
@@ -33,34 +37,30 @@ public class Sender {
         int choice = scanner.nextInt();
         scanner.nextLine();
 
+        Object objectToSerialize = null;
+
         switch (choice) {
             case 1:
-                SimpleObject simpleObject = createSimpleObject(scanner);
-                objectToSerialize = simpleObject;
+                objectToSerialize = ObjectCreator.createSimpleObject(scanner);
                 break;
             case 2:
-                ReferencesObject referencesObject = createReferencesObject(scanner);
-                objectToSerialize = referencesObject;
+                objectToSerialize = ObjectCreator.createReferencesObject(scanner);
                 break;
             case 3:
-                PrimitivesArray primitiveArray = createPrimitivesArray(scanner);
-                objectToSerialize = primitiveArray;
+                objectToSerialize = ObjectCreator.createPrimitivesArray(scanner);
                 break;
             case 4:
-                ReferencesArray referencesArray = createReferencesArray(scanner);
-                objectToSerialize = referencesArray;
+                objectToSerialize = ObjectCreator.createReferencesArray(scanner);
                 break;
             case 5:
-                CollectionObject collectionObject = createCollectionObject(scanner);
-                objectToSerialize = collectionObject;
+                objectToSerialize = ObjectCreator.createCollectionObject(scanner);
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
         }
 
         scanner.close();
-
-        serializeObject(hostname, port, objectToSerialize);
+        return objectToSerialize;
     }
 
     // SERIALIZE
@@ -83,12 +83,12 @@ public class Sender {
             Socket socket = new Socket(hostname, port);
             System.out.println("Connected to " + socket.getRemoteSocketAddress());
 
-            // reate output stream for communication using the BufferedOutputStream
+            // create output stream for communication using the BufferedOutputStream
             OutputStream outputStream = socket.getOutputStream();
             BufferedOutputStream bufferedStream = new BufferedOutputStream(outputStream);
 
             XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
-            String xmlString = xmlOutputter.outputString(document);
+            //String xmlString = xmlOutputter.outputString(document);
 
             // stream to output to the server
             ByteArrayOutputStream byteoutStream = new ByteArrayOutputStream();
@@ -109,113 +109,5 @@ public class Sender {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    // COLLECTION OBJECT
-    private static CollectionObject createCollectionObject(Scanner scanner) {
-        ArrayList<SimpleObject> objList = new ArrayList<SimpleObject>();
-        Scanner collectionScan = new Scanner(System.in);
-        String input;
-
-        int collectionSize;
-
-        System.out.println("How many objects do you want in the collection?");
-        input = collectionScan.nextLine();
-
-        collectionSize = Integer.parseInt(input);
-
-        for (int i = 0; i < collectionSize; i++) {
-            SimpleObject obj = createSimpleObject(collectionScan);
-            objList.add(obj);
-        }
-
-        CollectionObject objectsCollectionObject = new CollectionObject(objList);
-
-        return objectsCollectionObject;
-    }
-
-    // REFERENCES ARRAY
-    private static ReferencesArray createReferencesArray(Scanner scanner) {
-        // ReferencesArray referencesArray = new ReferencesArray();
-
-        System.out.println("Creating an array of Objects");
-        System.out.println("Enter size of array: ");
-        int size = scanner.nextInt();
-
-        SimpleObject[] refObjArray = new SimpleObject[size];
-
-        for (int i = 0; i < size; i++) {
-            System.out.printf("At index %d:\n", i);
-            SimpleObject simpleObj = createSimpleObject(scanner);
-            refObjArray[i] = simpleObj;
-        }
-
-        ReferencesArray referencesArray = new ReferencesArray(refObjArray);
-
-        System.out.println("Created array of references");
-        
-        // print out array
-        System.out.println("Your array values: ");
-        for (int i = 0; i < size; i++) {
-            System.out.println(refObjArray[i]);
-        }
-
-        return referencesArray;
-    }
-
-    // PRIMITIVE ARRAY
-    private static PrimitivesArray createPrimitivesArray(Scanner scanner) {
-        PrimitivesArray primitiveArray = new PrimitivesArray();
-
-        System.out.println("Creating an array of ints");
-        System.out.println("Enter size of array: ");
-        int size = scanner.nextInt();
-        primitiveArray.intArray = new int[size];
-
-        for (int i = 0; i < size; i++) {
-            System.out.println("Enter value for index " + i + ": ");
-            primitiveArray.intArray[i] = scanner.nextInt();
-        }
-
-        // print out array
-        System.out.println("Your array values: ");
-        for (int i = 0; i < size; i++) {
-            System.out.println(primitiveArray.intArray[i]);
-        }
-
-        System.out.println("Created array of ints");
-        return primitiveArray;
-    }
-
-    // REFERENCES OBJECT
-    private static ReferencesObject createReferencesObject(Scanner scanner) {
-        SimpleObject simpleObject = new SimpleObject();
-
-        System.out.println("Creating a simple Object A");
-        System.out.println("Enter integer value: ");
-        simpleObject.setIntValue(scanner.nextInt());
-
-        System.out.println("Enter double value: ");
-        simpleObject.setDoubleValue(scanner.nextDouble());
-
-        ReferencesObject referencesObject = new ReferencesObject(simpleObject);
-
-        System.out.println("Created Object B with reference to Object A");
-        return referencesObject;
-    }
-
-    // SIMPLE OBJECT
-    private static SimpleObject createSimpleObject(Scanner scanner) {
-        SimpleObject simpleObject = new SimpleObject();
-
-        System.out.println("Creating a simple object of 2 ints");
-        System.out.println("Enter integer value: ");
-        simpleObject.setIntValue(scanner.nextInt());
-
-        System.out.println("Enter double value: ");
-        simpleObject.setDoubleValue(scanner.nextDouble());
-
-        System.out.println("Created Object A");
-        return simpleObject;
     }
 }
