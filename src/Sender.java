@@ -35,7 +35,8 @@ public class Sender {
         System.out.println("2. References Object - contains references to other objects");
         System.out.println("3. Primitive Array Object - contains an array of primitives");
         System.out.println("4. References Array Object - contains an array of object references");
-        System.out.println("5. Java Collection Object - uses one of Java’s collection classes to refer to other objects\n");
+        System.out.println("5. Java Collection Object - uses one of Java’s collection classes to refer to other objects");
+        System.out.println("6. Circular Reference Object - object contains a circular reference to itself\n");
 
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -58,6 +59,9 @@ public class Sender {
             case 5:
                 objectToSerialize = ObjectCreator.createCollectionObject(scanner);
                 break;
+            case 6:
+                objectToSerialize = ObjectCreator.createCircularReferenceObject();
+                break;
             default:
                 System.out.println("Invalid choice. Please try again.");
         }
@@ -73,25 +77,24 @@ public class Sender {
 
         Document document = serializer.serialize(obj);
 
-        System.out.println("Creating document to send...");
         File fileToSend = XMLtoFile(document);
 
         System.out.println("Now going to send XML document...");
         sendDoc(hostname, port, document);
     }
 
-    // XML TO FILE
+    // for testing
     private static File XMLtoFile(Document document) throws IOException {
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
 
-        File sendFile = new File("fileToSend.xml");
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(sendFile));
+        File xmFile = new File("file.xml");
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(xmFile));
 
         xmlOutput.output(document, bufferedWriter);
         bufferedWriter.close();
 
-        return sendFile;
+        return xmFile;
     }
 
     // SENDING DOC
@@ -108,7 +111,6 @@ public class Sender {
             BufferedOutputStream bufferedStream = new BufferedOutputStream(outputStream);
 
             XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
-            //String xmlString = xmlOutputter.outputString(document);
 
             // stream to output to the server
             ByteArrayOutputStream byteoutStream = new ByteArrayOutputStream();

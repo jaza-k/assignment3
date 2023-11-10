@@ -2,6 +2,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -12,7 +13,6 @@ public class Serializer {
     public Document serialize(Object obj) {
         Document document = new Document(new Element("serialized"));
         serializeObject(obj, document.getRootElement());
-
         return document;
     }
 
@@ -24,14 +24,14 @@ public class Serializer {
 
         System.out.println("Object being serialized: " + obj.getClass().getName());
 
-        // check ifobject has been serialized before
-        if (objectToIdMap.containsKey(obj)) {
-            // add reference element
-            Element referenceElement = new Element("reference");
-            referenceElement.setText(objectToIdMap.get(obj).toString());
-            parentElement.addContent(referenceElement);
-            return;
-        }
+        // // check ifobject has been serialized before
+        // if (objectToIdMap.containsKey(obj)) {
+        //     // add reference element
+        //     Element referenceElement = new Element("reference");
+        //     referenceElement.setText(objectToIdMap.get(obj).toString());
+        //     parentElement.addContent(referenceElement);
+        //     return;
+        // }
         Class objClass = obj.getClass();
 
         // create a new object element
@@ -42,17 +42,19 @@ public class Serializer {
 
         objectIdCounter++;
         
-        if (objClass.isPrimitive()) {
-            objectElement.addContent(serializePrimitive(obj));
-        } 
-        else if (objClass.isArray()) {
+        if (objClass.isArray()) {
+            System.out.println("ARRAYYYYY");
             objectElement.setAttribute("length", Integer.toString(Array.getLength(obj)));
             for (Element e : serializeArray(obj, objectToIdMap)) {
                 objectElement.addContent(e);
             }
         } 
+        else if (objClass.isPrimitive()) {
+            objectElement.addContent(serializePrimitive(obj));
+        } 
         else {
             for (Field field : objClass.getDeclaredFields()) {
+                if (!Modifier.isStatic(field.getModifiers())) {
                 try {
                    field.setAccessible(true); 
                 }
@@ -68,18 +70,26 @@ public class Serializer {
                 try {
                     Object fieldValue = field.get(obj);
                     Class fieldType = field.getType();
+              
                     Element fieldContents = null;
                     if (fieldValue != null) {
                         if (fieldType.isPrimitive()) {
                             fieldContents = serializePrimitive(fieldValue);
                         }
+                        // check if field type is an array
+                        else if (fieldType.isArray()) {
+                            fieldContents = serializeArray(fieldValue, objectToIdMap)[0];
+                        }
                         else {
+                            System.out.println("Reached here");
                             fieldContents = serializeReference(fieldValue, fieldType, objectToIdMap);
                         }
+                        // Element valueElement = new Element("value");
+                        // valueElement.setText(fieldValue.toString());
+                        // fieldElement.addContent(valueElement);
 
-                        Element valueElement = new Element("value");
-                        valueElement.setText(fieldValue.toString());
-                        fieldElement.addContent(valueElement);
+                        fieldElement.addContent(fieldContents);
+
                     } else {
                         fieldElement.addContent(new Element("null"));
                     }
@@ -90,29 +100,24 @@ public class Serializer {
             }
             parentElement.addContent(objectElement);
         }
+        }
     }
 
     private Element serializeReference(Object fieldValue, Class<?> fieldType, Map<Object, Integer> objectToIdMap) {
         System.out.println("Serializing a reference");
+        Element referenceElement = new Element("reference");
         if (objectToIdMap.containsKey(fieldValue)) {
-            // the referred object has been serialized before, add reference element
-            Element referenceElement = new Element("reference");
             referenceElement.setText(objectToIdMap.get(fieldValue).toString());
-            return referenceElement;
         } else {
-            // the referred object hasn't been serialized yet, serialize and add new object element
-            Element referredObjectElement = new Element("object");
-            referredObjectElement.setAttribute("class", fieldType.getName());
-            referredObjectElement.setAttribute("id", String.valueOf(objectIdCounter));
-    
-            serializeObject(fieldValue, referredObjectElement);
-    
-            return referredObjectElement;
+            referenceElement.setText(String.valueOf(objectIdCounter));
+            serializeObject(fieldValue, referenceElement);
         }
+        return referenceElement;
     }
 
     private Element[] serializeArray(Object obj, Map<Object, Integer> objectToIdMap) {
         System.out.println("Serializing an array");
+
         Class<?> componentType = obj.getClass().getComponentType();
         int length = Array.getLength(obj);
 

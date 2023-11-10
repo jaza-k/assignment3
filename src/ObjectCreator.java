@@ -9,11 +9,26 @@ public class ObjectCreator {
         System.out.println("Enter integer value: ");
         simpleObject.setIntValue(scanner.nextInt());
 
-        System.out.println("Enter double value: ");
-        simpleObject.setDoubleValue(scanner.nextDouble());
+        System.out.println("Enter integer value: ");
+        simpleObject.setIntValue(scanner.nextInt());
 
         System.out.println("Created Object A");
         return simpleObject;
+    }
+
+    public static Object createCircularReferenceObject() {
+        System.out.println("\nCreating two objects with circular reference to each other");
+        System.out.println("Specify object 1 ID");
+        CircularObject obj1 = new CircularObject();
+        Scanner scanner = new Scanner(System.in);
+        obj1.id = scanner.nextInt();
+        System.out.println("Specify object 2 ID");
+        CircularObject obj2 = new CircularObject();
+        obj2.id = scanner.nextInt();;
+        obj1.object2 = obj2;
+        obj2.object2 = obj1;
+        scanner.close();
+        return obj1;
     }
 
     public static ReferencesObject createReferencesObject(Scanner scanner) {

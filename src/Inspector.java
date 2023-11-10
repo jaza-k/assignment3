@@ -100,14 +100,15 @@ public class Inspector {
                 System.out.println("Value: " + value);
             } else if (field.getType().isArray()) {
                 System.out.println("Field is an array");
-                Object value = field.get(obj);
-                if (value != null) {
-                    int length = Array.getLength(value);
-                    System.out.println("Array length: " + length);
-                    System.out.println("Array contents: " + Arrays.toString((Object[]) value));
-                } else {
-                    System.out.println("Value is null");
-                }
+                // Object value = field.get(obj);
+
+                // if (value != null) {
+                //     int length = Array.getLength(value);
+                //     System.out.println("Array length: " + length);
+                //     System.out.println("Array contents: " + Arrays.toString((Object[]) value));
+                // } else {
+                //     System.out.println("Value is null");
+                // }
             } else {
                 // handle non array reference fields
                 Object objValue = field.get(obj);

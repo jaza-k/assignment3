@@ -10,11 +10,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Receiver {
-    private static Deserializer deserializer = null;
 
     public static void main(String[] args) throws JDOMException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         int port = 12345; 
-        deserializer = new Deserializer();
 
         // Some code is taken from tutorial Week 7 - Spooky Session 2 (MyServer.java)
         try {
@@ -35,7 +33,7 @@ public class Receiver {
             System.out.println(xmlString);
 
             // Deserialize the object
-            Object deserializedObject = deserializer.deserialize(document);
+            Object deserializedObject = new Deserializer().deserialize(document);
 
             // Display the deserialized object 
             processDeserializedObject(deserializedObject);
@@ -57,9 +55,9 @@ public class Receiver {
         Inspector inspector = new Inspector();
         inspector.inspect(deserializedObject, false);
 
-        System.out.println("\nDeserialized object: " + deserializedObject.getClass().getName());
-        System.out.println("Object hashcode: " + System.identityHashCode(deserializedObject));
-        System.out.println("Object fields: " + deserializedObject.getClass().getDeclaredFields().length);
-        System.out.println("Object methods: " + deserializedObject.getClass().getDeclaredMethods().length);
+        // System.out.println("\nDeserialized object: " + deserializedObject.getClass().getName());
+        // System.out.println("Object hashcode: " + System.identityHashCode(deserializedObject));
+        // System.out.println("Object fields: " + deserializedObject.getClass().getDeclaredFields().length);
+        // System.out.println("Object methods: " + deserializedObject.getClass().getDeclaredMethods().length);
     }
 }
